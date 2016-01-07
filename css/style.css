@@ -1,0 +1,55 @@
+.highlighted {
+  background-color: #F5A9E1;
+  color: #ffffff;
+}
+.container {
+	float: left; 
+	border: 1px solid black;
+    overflow: auto
+}
+
+
+table#shell_table{
+	width:100%;
+	height: 50px;
+	border: 1px solid black;
+
+}
+
+table#url_table {
+    border: 1px solid black;
+    overflow: auto
+}
+#url_table tr {
+    border-top: 1px solid #fff;
+}
+#url_table tr:hover {
+    background-color: #ccc;
+}
+#url_table th {
+    background-color: #fff;
+}
+#url_table th, #url_table td {
+    padding: 3px 5px;
+}
+#url_table td:hover {
+    cursor: pointer;
+}
+
+table#article_table {
+	align: right;
+    border: 1px solid black;
+    overflow: auto
+}
+
+div.controlbuttons {
+	line-height: 20px;
+	width: 50px;
+	font-size: 8pt;
+	font-family: tahoma;
+	margin-top: 20px;
+	margin-right: 20px;
+	position: absolute;
+	top:0;
+	right:20px;
+ }
