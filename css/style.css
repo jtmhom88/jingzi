@@ -49,7 +49,7 @@ div.controlbuttons {
 	font-family: tahoma;
 	margin-top: 20px;
 	margin-right: 20px;
-	position: absolute;
+	position: fixed;
 	top:0;
 	right:20px;
  }
