@@ -8,7 +8,10 @@
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+<!--<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script> -->
+
 <script type="text/javascript">
+
 $(document).ready(function() {
   console.log( "ready!" );
   // Make DataTable
@@ -16,6 +19,10 @@ $(document).ready(function() {
   var this_article_id = '-999';
   var this_article_line_no = '-999';
   var sentstate = 'NIRVANA';
+
+  //$( "#datepicker" ).on('click', function() {
+  //    $("#datepicker").datepicker();
+  //});
 
   // Clear article_table
   function clearArticles() {
@@ -51,9 +58,8 @@ $(document).ready(function() {
       console.log(this_sentiment_id);
       var e = document.getElementById(this_sentiment_id);
       sentstate = e.options[e.selectedIndex].value;
-      console.log(sentstate);
-
-      alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);  
+      console.log(sentstate + ':' + this_article_id + ':' + this_article_line_no);
+      //alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);  
     });
 
   $('#button1').click(function () {
@@ -125,7 +131,7 @@ $(document).ready(function() {
       if (sentstate == 'none') {
         alert('Please select a Sentiment state from dropdown')
       } else {
-        alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);
+        //alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);
         var myjsonObject = {article_id:this_article_id, article_line_no:this_article_line_no, sentiment:sentstate};
         console.log(myjsonObject);
         // Post request like url?key1=value1&key2=value2
@@ -140,8 +146,8 @@ $(document).ready(function() {
           dataType:"text",
           data: datapayload,
           success:function(response){
-            alert(response);
-            alert("Update success");
+            //alert(response);
+            //alert("Update success");
             console.log('Update success');
           },
           error:function (xhr, ajaxOptions, thrownError){
@@ -166,6 +172,7 @@ $(document).ready(function() {
 
 <body>
 
+<p>Date: <input type="text" id="datepicker" value="<?php echo date('Y-m-d'); ?>" ></p>
 <div class= 'controlbuttons'>
 <input id="Logout" type="button" value="Logout" /> <br><br>
 <button id="button1">Fetch</button><br><br>
@@ -189,7 +196,7 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 include_once("config.php");
 $this_table='article_urls';
 
-$sql = "SELECT idx, url, title, datasource, read_flag FROM $databasename.$this_table where read_flag=0 and dt_modified > DATE_SUB(NOW(), INTERVAL 4 HOUR) limit 2000";
+$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM $databasename.$this_table where read_flag=0 and DATE(dt_modified)=CURDATE() limit 2000";
 $result = $conn->query($sql);
 
 // Display Table
@@ -201,6 +208,7 @@ echo "<th>Url</th>";
 echo "<th>Title</th>";
 echo "<th>Source</th>";
 echo "<th>Read</th>";
+echo "<th>Date</th>";
 echo "</tr>";
 echo "</thead>";
 echo "<tbody>";
@@ -222,6 +230,7 @@ if ($result->num_rows > 0) {
         echo "<td class='Title' id='Title$line_id'>" . $title_trunc . "</td>";
         echo "<td class='Datasource' id='Datasource$line_id'>" . $row["datasource"] . "</td>";        
         echo "<td class='Read_flag' id='Read_flag$line_id'>" . $row["read_flag"] . "</td>";
+        echo "<td class='Date' id='Date$line_id'>" . $row["mydate"] . "</td>";
         echo "</tr>";
     }
 } else {
