@@ -11,8 +11,11 @@
 <script type="text/javascript">
 $(document).ready(function() {
   console.log( "ready!" );
-  // Get the table
+  // Make DataTable
   var url_table = $('#url_table').DataTable();
+  var this_article_id = '-999';
+  var this_article_line_no = '-999';
+  var sentstate = 'NIRVANA';
 
   // Clear article_table
   function clearArticles() {
@@ -31,6 +34,27 @@ $(document).ready(function() {
       $(this).addClass('highlighted');
     });
 
+  $('#article_table tbody').on( 'click', 'tr', function () {
+      if ( $(this).hasClass('selected') ) {
+        $(this).removeClass('selected');
+      }
+      else {
+        $(this).removeClass('selected');
+        $(this).addClass('selected');
+      }
+      $('tr').removeClass('highlighted');
+      $(this).addClass('highlighted');
+      $(this).addClass('selected');
+      this_article_id=$(this).find('td:eq(1)').html();
+      this_article_line_no=$(this).find('td:eq(2)').html();
+      var this_sentiment_id = "sentstate" + this_article_line_no ;
+      console.log(this_sentiment_id);
+      var e = document.getElementById(this_sentiment_id);
+      sentstate = e.options[e.selectedIndex].value;
+      console.log(sentstate);
+
+      alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);  
+    });
 
   $('#button1').click(function () {
       // Toggle select a row
@@ -42,19 +66,12 @@ $(document).ready(function() {
       // Get the rowdata
       console.log(rowdata);
       var this_id = rowdata[0];
-      //var this_sentiment = "sentstate"+this_id;
-      //console.log(this_sentiment);
-      //var e = document.getElementById(this_sentiment);
-      //var sentstate = e.options[e.selectedIndex].value;
-      //console.log(sentstate);
       var this_read_flag = "Read_flag"+this_id;
       console.log(this_read_flag);
       var flag_value = document.getElementById(this_read_flag).innerHTML;
       console.log(flag_value);
       document.getElementById(this_read_flag).innerHTML="1";
 
-      // javascript can directly encode json
-      //var myjsonObject = {"read_flag":"1"};
       var myjsonObject = {id:this_id, read_flag:"1"};
       console.log(myjsonObject);
       // Post request like url?key1=value1&key2=value2
@@ -65,25 +82,16 @@ $(document).ready(function() {
       // Ajax Mysql request
       jQuery.ajax({
         type: "POST", // HTTP method POST or GET
-        url: "update_table.php", //Where to make Ajax calls
+        url: "fetch_article.php", //Where to make Ajax calls
         dataType:"text",
         data: datapayload,
         success:function(response){
-
-          // var Parent = document.getElementById('article_table');
-          // tableID = $(this).closest('article_table').attr('id');
-          // alert(tableID);
-          // if (Parent !== null) {
-          //   while(Parent.hasChildNodes())
-          //   {
-          //      Parent.removeChild(Parent.firstChild);
-          //   }
-          // }
-          //$("#responds").append(response);
           clearArticles();
           $("#article_table >tbody:first").append(response);
-          alert(response);
-          alert("Update success");
+          //alert(response);
+          //alert("Fetch success");
+          //console.log(response);
+          console.log('Fetch success');
         },
         error:function (xhr, ajaxOptions, thrownError){
           //On error, we alert user
@@ -113,6 +121,41 @@ $(document).ready(function() {
   });
 
   $('#button2').click(function() {
+    if ( $('#article_table tr').hasClass('selected') ) {
+      if (sentstate == 'none') {
+        alert('Please select a Sentiment state from dropdown')
+      } else {
+        alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);
+        var myjsonObject = {article_id:this_article_id, article_line_no:this_article_line_no, sentiment:sentstate};
+        console.log(myjsonObject);
+        // Post request like url?key1=value1&key2=value2
+        // use payload as the key and json string as a value
+        var datapayload = "payload=" + JSON.stringify(myjsonObject);
+        console.log(datapayload);
+
+        // Ajax Mysql request
+        jQuery.ajax({
+          type: "POST", // HTTP method POST or GET
+          url: "update_table.php", //Where to make Ajax calls
+          dataType:"text",
+          data: datapayload,
+          success:function(response){
+            alert(response);
+            alert("Update success");
+            console.log('Update success');
+          },
+          error:function (xhr, ajaxOptions, thrownError){
+            //On error, we alert user
+            alert(thrownError);
+          }
+        });
+      }
+    } else {
+      alert('Please select article_table row selected');
+    }
+  });
+
+  $('#button3').click(function() {
     clearArticles();
   });
 
@@ -125,8 +168,9 @@ $(document).ready(function() {
 
 <div class= 'controlbuttons'>
 <input id="Logout" type="button" value="Logout" /> <br><br>
-<button id="button1">Submit</button><br><br>
-<button id="button2">Clear</button><br><br>
+<button id="button1">Fetch</button><br><br>
+<button id="button2">Update</button><br><br>
+<button id="button3">Clear</button><br><br>
 </div>
 
 
@@ -145,7 +189,7 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 include_once("config.php");
 $this_table='article_urls';
 
-$sql = "SELECT idx, url, title, datasource, read_flag FROM $databasename.$this_table where read_flag=0 limit 20";
+$sql = "SELECT idx, url, title, datasource, read_flag FROM $databasename.$this_table where read_flag=0 and dt_modified > DATE_SUB(NOW(), INTERVAL 4 HOUR) limit 2000";
 $result = $conn->query($sql);
 
 // Display Table
@@ -172,9 +216,10 @@ if ($result->num_rows > 0) {
         echo "<td class='ID' id='ID$line_id'>" . $row["idx"] . "</td>";
         //echo "<td class='Url' id='Url$line_id'>" . $row["url"] . "<a href='" . $row["url"] . "'a> </td>";
         //echo "<td class='Url' id='Url$line_id'> <a href='http://www.google.com/'>Cell 1</a></td>";
-        $title_trunc = substr($row['url'], 0, 80);
-        echo "<td class='Url' id='Url$line_id'> <a href='" . $row["url"] . "'>" . $title_trunc . "</a></td>";
-        echo "<td class='Title' id='Title$line_id'>" . $row["title"] . "</td>";
+        $url_trunc = substr($row['url'], 0, 80);
+        echo "<td class='Url' id='Url$line_id'> <a href='" . $row["url"] . "'>" . $url_trunc . "</a></td>";
+        $title_trunc = substr($row['title'], 0, 60);
+        echo "<td class='Title' id='Title$line_id'>" . $title_trunc . "</td>";
         echo "<td class='Datasource' id='Datasource$line_id'>" . $row["datasource"] . "</td>";        
         echo "<td class='Read_flag' id='Read_flag$line_id'>" . $row["read_flag"] . "</td>";
         echo "</tr>";
@@ -194,14 +239,14 @@ $picked="state$line_id";
 <table class= 'article_table' border='1' id='article_table' >
 <thead>
 <tr>
+<th>Sentiment</th>
 <th>Id</th>
 <th>Line</th>
 <th>Article Text</th>
 </tr>
 </thead>
 <tbody>
-<tr><td>999</td><td>0</td><td>Mary Had a Little Lamb</td><tr>
-
+<tr><td>Euphoria</td><td>999</td><td>0</td><td>Mary Had a Little Lamb</td><tr>
 </tbody>
 </table>
 

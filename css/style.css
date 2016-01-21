@@ -18,6 +18,7 @@ table#shell_table{
 
 table#url_table {
     border: 1px solid black;
+    width: 85%;
     overflow: auto
 }
 #url_table tr {
@@ -38,6 +39,7 @@ table#url_table {
 
 table#article_table {
 	align: right;
+	width: 95%;
     border: 1px solid black;
     overflow: auto
 }
