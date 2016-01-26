@@ -59,6 +59,7 @@ function quote_colorize($line) {
 	    $fixed_line = '<font color="blue">' . $line . '</font>' ;
 		} 
 	}
+	// Return the colored line
 	return $fixed_line;
 }
 
