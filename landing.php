@@ -81,11 +81,6 @@ $(document).ready(function() {
 <img class="displayed" src="jingmei.jpg" >
 <div  align='center' style='color:#0000FF'>
 <p>Welcome to Jingmei!</p>
-<a href="http://<?php echo $_SERVER['MYSQL_IP'];?>:80/table.php">table example</a>
-<br>
-<a href="http://<?php echo $_SERVER['MYSQL_IP'];?>:80/select.php">select tag example</a>
-<br>
-<a href="http://<?php echo $_SERVER['MYSQL_IP'];?>:80/onclick.php">on click example</a>
 <br>
 <a href="http://<?php echo $_SERVER['MYSQL_IP'];?>:80/sentreader.php">Sentiment Reader</a>
 <br>

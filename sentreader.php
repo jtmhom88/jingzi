@@ -29,6 +29,11 @@ $(document).ready(function() {
     $("#article_table > tbody").html("");
   }
 
+  // Clear url_table
+  function clearUrls() {
+    $("#url_table > tbody").html("");
+  }
+
   $('#url_table tbody').on( 'click', 'tr', function () {
       if ( $(this).hasClass('selected') ) {
           $(this).removeClass('selected');
@@ -39,6 +44,49 @@ $(document).ready(function() {
       }
       $('tr').removeClass('highlighted');
       $(this).addClass('highlighted');
+      // Get article after click
+            // Toggle select a row
+      if (url_table.row('.selected').data() !== undefined) {
+        var rowdata = url_table.row('.selected').data();
+      } else {
+        alert("You must select a row!");
+      }
+      // Get the rowdata
+      console.log(rowdata);
+      var this_id = rowdata[0];
+      var this_read_flag = "Read_flag"+this_id;
+      console.log(this_read_flag);
+      var flag_value = document.getElementById(this_read_flag).innerHTML;
+      console.log(flag_value);
+      document.getElementById(this_read_flag).innerHTML="1";
+
+      var myjsonObject = {id:this_id, read_flag:"1"};
+      console.log(myjsonObject);
+      // Post request like url?key1=value1&key2=value2
+      // use payload as the key and json string as a value
+      var datapayload = "payload=" + JSON.stringify(myjsonObject);
+      console.log(datapayload);
+      
+      // Ajax Mysql request
+      jQuery.ajax({
+        type: "POST", // HTTP method POST or GET
+        url: "fetch_article.php", //Where to make Ajax calls
+        dataType:"text",
+        data: datapayload,
+        success:function(response){
+          clearArticles();
+          $("#article_table >tbody:first").append(response);
+          //alert(response);
+          //alert("Fetch success");
+          //console.log(response);
+          console.log('Fetch success');
+        },
+        error:function (xhr, ajaxOptions, thrownError){
+          //On error, we alert user
+          alert(thrownError);
+        }
+      });
+
     });
 
   $('#article_table tbody').on( 'click', 'tr', function () {
@@ -61,7 +109,7 @@ $(document).ready(function() {
       console.log(sentstate + ':' + this_article_id + ':' + this_article_line_no);
       //alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);  
     });
-
+/*
   $('#button1').click(function () {
       // Toggle select a row
       if (url_table.row('.selected').data() !== undefined) {
@@ -104,32 +152,36 @@ $(document).ready(function() {
           alert(thrownError);
         }
       });
+  });
+*/
 
-      //##### send add record Ajax request to response.php #########
-      $("#Logout").click(function (e) {
-        alert("Logging Out");
-          //var myData = 'content_txt='+ $("#contentText").val(); //build a post data structure
-          var myData = '1';
-          jQuery.ajax({
-          type: "POST", // HTTP method POST or GET
-          url: "logout.php", //Where to make Ajax calls
-          dataType:"text", // Data type, HTML, json etc.
-          data:myData, //Form variables
-          success:function(response){
-            alert("Successfully Logged Out");
-            window.location.href = 'auth.php' ;
-          },
-          error:function (xhr, ajaxOptions, thrownError){
-            alert(thrownError);
-          }
-          });
+  $('#button1').click(function () {
+    alert("Fetching...");
+  });
+
+  $("#Logout").click(function (e) {
+    alert("Logging Out");
+      //var myData = 'content_txt='+ $("#contentText").val(); //build a post data structure
+      var myData = '1';
+      jQuery.ajax({
+      type: "POST", // HTTP method POST or GET
+      url: "logout.php", //Where to make Ajax calls
+      dataType:"text", // Data type, HTML, json etc.
+      data:myData, //Form variables
+      success:function(response){
+        alert("Successfully Logged Out");
+        window.location.href = 'auth.php' ;
+      },
+      error:function (xhr, ajaxOptions, thrownError){
+        alert(thrownError);
+      }
       });
   });
 
   $('#button2').click(function() {
     if ( $('#article_table tr').hasClass('selected') ) {
       if (sentstate == 'none') {
-        alert('Please select a Sentiment state from dropdown')
+        alert('Please select a Sentiment state from dropdown');
       } else {
         //alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);
         var myjsonObject = {article_id:this_article_id, article_line_no:this_article_line_no, sentiment:sentstate};
@@ -163,6 +215,47 @@ $(document).ready(function() {
 
   $('#button3').click(function() {
     clearArticles();
+    clearUrls();
+  });
+
+  $(document).keypress(function(event){
+      var keycode = (event.keyCode ? event.keyCode : event.which);
+      if(keycode == '13'){
+          //alert('You pressed a "enter" key in somewhere');
+          console.log('You pressed a "enter" key in somewhere');
+          if ( $('#article_table tr').hasClass('selected') ) {
+            if (sentstate == 'none') {
+              alert('Please select a Sentiment state from dropdown');
+            } else {
+              //alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);
+              var myjsonObject = {article_id:this_article_id, article_line_no:this_article_line_no, sentiment:sentstate};
+              console.log(myjsonObject);
+              // Post request like url?key1=value1&key2=value2
+              // use payload as the key and json string as a value
+              var datapayload = "payload=" + JSON.stringify(myjsonObject);
+              console.log(datapayload);
+
+              // Ajax Mysql request
+              jQuery.ajax({
+                type: "POST", // HTTP method POST or GET
+                url: "update_table.php", //Where to make Ajax calls
+                dataType:"text",
+                data: datapayload,
+                success:function(response){
+                  //alert(response);
+                  //alert("Update success");
+                  console.log('Update success');
+                },
+                error:function (xhr, ajaxOptions, thrownError){
+                  //On error, we alert user
+                  alert(thrownError);
+                }
+              });
+            }
+          } else {
+            alert('Please select article_table row selected');
+          }
+      }
   });
 
 });
@@ -172,7 +265,9 @@ $(document).ready(function() {
 
 <body>
 
-<p>Date: <input type="text" id="datepicker" value="<?php echo date('Y-m-d'); ?>" ></p>
+<p>Date: <input type="text" id="datepicker" value="<?php echo date('Y-m-d'); ?>" >
+Relevancy: <input type="text" id="relevancy" value="1" ></p>
+
 <div class= 'controlbuttons'>
 <input id="Logout" type="button" value="Logout" /> <br><br>
 <button id="button1">Fetch</button><br><br>
@@ -194,9 +289,12 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
 //include db configuration file
 include_once("config.php");
+include_once("find_quotes.php");
+
+// Mysql 
 $this_table='article_urls';
 
-$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM $databasename.$this_table where read_flag=0 and DATE(dt_modified)=CURDATE() limit 2000";
+$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM $databasename.$this_table where read_flag=0 and relevancy_score>0 and downloaded_flag = 1 and dt_modified > DATE_SUB(NOW(), INTERVAL 12 HOUR) limit 2000";
 $result = $conn->query($sql);
 
 // Display Table

@@ -17,6 +17,7 @@ if (isset($_SESSION['Username1']) && isset($_SESSION['Password1'])) {
 	if ($conn->connect_errno) {
 		echo "<font size='3' color='red'><strong>Failed to connect to MySQL: (" . $conn->connect_errno . ") </strong></font>" . $conn->connect_error;
 	} else {
+		mysqli_set_charset($conn,"utf8");
 		//echo "config: You are connected.";
 	}
 }

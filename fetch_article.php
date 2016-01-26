@@ -9,6 +9,7 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
 //include db configuration file
 include_once("config.php");
+include_once("find_quotes.php");
 
 $ary = json_decode($_POST['payload'], true);
 
@@ -72,7 +73,8 @@ if(isset($ary['id']) )
             </TD>";
 			echo "<td class='IDX' id='IDX$article_line_no'>" . $article_idx . "</td>";
 			echo "<td class='Line_no' id='Line_no$article_line_no'>" . $article_line_no . "</td>";
-			echo "<td class='Text' id='Text$article_line_no'>" . $article_text . "</td>";
+			$fixed_article_text = quote_colorize($article_text);
+			echo "<td class='Text' id='Text$article_line_no'>" . $fixed_article_text . "</td>";
 			echo "</tr>";
      	}
 
