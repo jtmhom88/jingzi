@@ -12,6 +12,10 @@
 
 <script type="text/javascript">
 
+function reloadFunction() {
+    location.reload();
+};
+
 $(document).ready(function() {
   console.log( "ready!" );
   // Make DataTable
@@ -109,54 +113,9 @@ $(document).ready(function() {
       console.log(sentstate + ':' + this_article_id + ':' + this_article_line_no);
       //alert(sentstate + ':' + this_article_id + ':' + this_article_line_no);  
     });
-/*
-  $('#button1').click(function () {
-      // Toggle select a row
-      if (url_table.row('.selected').data() !== undefined) {
-        var rowdata = url_table.row('.selected').data();
-      } else {
-        alert("You must select a row!");
-      }
-      // Get the rowdata
-      console.log(rowdata);
-      var this_id = rowdata[0];
-      var this_read_flag = "Read_flag"+this_id;
-      console.log(this_read_flag);
-      var flag_value = document.getElementById(this_read_flag).innerHTML;
-      console.log(flag_value);
-      document.getElementById(this_read_flag).innerHTML="1";
-
-      var myjsonObject = {id:this_id, read_flag:"1"};
-      console.log(myjsonObject);
-      // Post request like url?key1=value1&key2=value2
-      // use payload as the key and json string as a value
-      var datapayload = "payload=" + JSON.stringify(myjsonObject);
-      console.log(datapayload);
-      
-      // Ajax Mysql request
-      jQuery.ajax({
-        type: "POST", // HTTP method POST or GET
-        url: "fetch_article.php", //Where to make Ajax calls
-        dataType:"text",
-        data: datapayload,
-        success:function(response){
-          clearArticles();
-          $("#article_table >tbody:first").append(response);
-          //alert(response);
-          //alert("Fetch success");
-          //console.log(response);
-          console.log('Fetch success');
-        },
-        error:function (xhr, ajaxOptions, thrownError){
-          //On error, we alert user
-          alert(thrownError);
-        }
-      });
-  });
-*/
 
   $('#button1').click(function () {
-    alert("Fetching...");
+    alert("Fetching not implemented...");
   });
 
   $("#Logout").click(function (e) {
@@ -265,19 +224,6 @@ $(document).ready(function() {
 
 <body>
 
-<p>Date: <input type="text" id="datepicker" value="<?php echo date('Y-m-d'); ?>" >
-Relevancy: <input type="text" id="relevancy" value="1" ></p>
-
-<div class= 'controlbuttons'>
-<input id="Logout" type="button" value="Logout" /> <br><br>
-<button id="button1">Fetch</button><br><br>
-<button id="button2">Update</button><br><br>
-<button id="button3">Clear</button><br><br>
-</div>
-
-
-<ul id="responds"></ul>
-
 <?php
 session_start(); 
 
@@ -285,6 +231,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 $path = '/root/documentRoot';
+//$path =  '/Users/johnnyhom/documentRoot';
+
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
 //include db configuration file
@@ -294,8 +242,35 @@ include_once("find_quotes.php");
 // Mysql 
 $this_table='article_urls';
 
-$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM $databasename.$this_table where read_flag=0 and relevancy_score>0 and downloaded_flag = 1 and dt_modified > DATE_SUB(NOW(), INTERVAL 12 HOUR) limit 2000";
+// Get Session Parameters
+
+if (isset($_POST['datepicker']) && isset($_POST['relevancy'])) {
+  $_SESSION['datepicker'] = $_POST['datepicker'];
+  $_SESSION['relevancy'] = $_POST['relevancy'];
+} else if(!isset($_SESSION['datepicker']) || !isset($_SESSION['relevancy'])) {
+  echo "Set default datepicker and relevancy<br>";
+  $_SESSION['datepicker'] = date('Y-m-d');
+  $_SESSION['relevancy'] = 1;
+} else {
+  //echo "Error datepicker and relevancy not set!<br>";  
+};
+
+$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where read_flag=0 and relevancy_score>=".$_SESSION['relevancy']." and downloaded_flag = 1 and dt_modified > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and dt_modified < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
+//echo "$sql<br>";
 $result = $conn->query($sql);
+
+// Top of body
+$landing_url = "http://" . $hostname . ":80/landing.php";
+echo "
+<a href='$landing_url'>Go Back to Landing Page</a>
+<div class= 'controlbuttons'>
+<input id='Logout' type='button' value='Logout' /> <br><br><br>
+<button id='button2'>Update</button><br><br><br>
+<button onclick='reloadFunction()'>Reload page</button> <br><br><br>
+<button id='button3'>Clear</button><br><br><br>
+</div>
+<ul id='responds'></ul>
+";
 
 // Display Table
 echo "<table class= 'url_table' border='1' id='url_table' >\n";

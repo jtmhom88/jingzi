@@ -19,9 +19,9 @@ if(isset($_SESSION['Username1']) && $_SESSION['Password1']) {
 include_once("config.php");
 if (isset($conn))
 {
-	echo "YAYY";
+	echo "You are connected.";
 } else {
-	echo "YUUUK";
+	echo "Cannot connect!";
 }
 
 ?>
@@ -81,6 +81,8 @@ $(document).ready(function() {
 <img class="displayed" src="jingmei.jpg" >
 <div  align='center' style='color:#0000FF'>
 <p>Welcome to Jingmei!</p>
+<br>
+<a href="http://<?php echo $_SERVER['MYSQL_IP'];?>:80/sentparams.php">Sentiment Parameters</a>
 <br>
 <a href="http://<?php echo $_SERVER['MYSQL_IP'];?>:80/sentreader.php">Sentiment Reader</a>
 <br>
