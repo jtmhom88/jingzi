@@ -244,19 +244,22 @@ $this_table='article_urls';
 
 // Get Session Parameters
 
-if (isset($_POST['datepicker']) && isset($_POST['relevancy'])) {
+if (isset($_POST['datepicker']) && isset($_POST['relevancy']) && isset($_POST['read']) ) {
   $_SESSION['datepicker'] = $_POST['datepicker'];
   $_SESSION['relevancy'] = $_POST['relevancy'];
-} else if(!isset($_SESSION['datepicker']) || !isset($_SESSION['relevancy'])) {
+  $_SESSION['read'] = $_POST['read'];
+} else if(!isset($_SESSION['datepicker']) || !isset($_SESSION['relevancy']) ||  !isset($_POST['read']) ) {
   echo "Set default datepicker and relevancy<br>";
   $_SESSION['datepicker'] = date('Y-m-d');
   $_SESSION['relevancy'] = 1;
+  $_SESSION['read'] = 0;
 } else {
   //echo "Error datepicker and relevancy not set!<br>";  
 };
 
-$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where read_flag=0 and relevancy_score>=".$_SESSION['relevancy']." and downloaded_flag = 1 and dt_modified > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and dt_modified < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
-//echo "$sql<br>";
+#$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where read_flag=0 and relevancy_score>=".$_SESSION['relevancy']." and downloaded_flag = 1 and dt_modified > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and dt_modified < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
+$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where relevancy_score>=".$_SESSION['relevancy']." and read_flag=".$_SESSION['read']." and downloaded_flag = 1 and dt_modified > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and dt_modified < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
+echo "$sql<br>";
 $result = $conn->query($sql);
 
 // Top of body
