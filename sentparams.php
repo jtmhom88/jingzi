@@ -54,6 +54,7 @@ $today = date('Y-m-d');
 echo "Date     :<input type='text' name='datepicker' id='datepicker' value='". $today."'>" ; 
 echo "Relevancy:<input type='text' name='relevancy' id='relevancy' value=1>
       Read:<input type='text' name='read' id='read' value=0>
+      Scored:<input type='text' name='scored' id='scored' value=0>
 			<br><br>
 			<input type='submit' name='submit' value='Run Reader'> 
 		</form>
