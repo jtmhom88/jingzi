@@ -259,8 +259,7 @@ if (isset($_POST['datepicker']) && isset($_POST['relevancy']) && isset($_POST['r
   //echo "Error datepicker and relevancy not set!<br>";  
 };
 
-#$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where read_flag=0 and relevancy_score>=".$_SESSION['relevancy']." and downloaded_flag = 1 and dt_modified > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and dt_modified < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
-$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where relevancy_score>=".$_SESSION['relevancy']." and read_flag=".$_SESSION['read']." and scored_flag=".$_SESSION['scored']." and downloaded_flag = 1 and dt_modified > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and dt_modified < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
+$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where relevancy_score>=".$_SESSION['relevancy']." and read_flag=".$_SESSION['read']." and scored_flag=".$_SESSION['scored']." and downloaded_flag = 1 and insert_date > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and insert_date < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
 echo "$sql<br>";
 $result = $conn->query($sql);
 
