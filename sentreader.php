@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="css/style.css" type="text/css">
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.16/sl-1.2.4/datatables.min.js"></script>
+<!--<script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script> -->
 <!--<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script> -->
 
 <script type="text/javascript">
@@ -19,14 +20,18 @@ function reloadFunction() {
 $(document).ready(function() {
   console.log( "ready!" );
   // Make DataTable
-  var url_table = $('#url_table').DataTable();
+  var url_table = $('#url_table').DataTable( {
+  "lengthMenu": [ 25, 50, 100 ]
+  }
+  );
   var this_article_id = '-999';
   var this_article_line_no = '-999';
   var sentstate = 'NIRVANA';
 
-  //$( "#datepicker" ).on('click', function() {
-  //    $("#datepicker").datepicker();
-  //});
+
+  //------------------------------------------------------------
+  // jQuery for arrow keys and editing idea from here:
+  var currRow = $('tr').first();
 
   // Clear article_table
   function clearArticles() {
@@ -37,6 +42,181 @@ $(document).ready(function() {
   function clearUrls() {
     $("#url_table > tbody").html("");
   }
+
+  // User navigates table using keyboard
+  $('#url_table tbody tr').keydown(function (e) {
+
+    var pageLength = url_table.page.len();
+    //alert("pageLength-->"+pageLength);
+    if (e.which == 38) {
+      // Up Arrow
+      // Get current prev and next rows
+      //alert( 'Row index: '+ url_table.row( this ).index() );
+      
+      //Set the index based on the row that was clicked
+      var CurItemIndex = url_table.row( this ).index();
+      //Get the indexes 
+      var CurTableIndexs = url_table.rows().indexes();
+      var CountIndexes = CurTableIndexs.length;
+      //alert( 'Rows Count-->> '+CountIndexes);
+      // Get the array key for the current index we have
+      var CurIndexArrayKey = CurTableIndexs.indexOf( CurItemIndex );
+      //alert( 'Row CurIndexArrayKey: '+ CurIndexArrayKey );
+      // Subtract 1 to the array key to get the prior index number
+      // if top row, default to same top row
+      var PrevItemIndex = (CurIndexArrayKey > 0 ) ? CurTableIndexs[ CurIndexArrayKey - 1] : CurTableIndexs[0] ;
+      //alert( 'Row PrevItemIndex: '+ PrevItemIndex );
+      // Add 1 to get the next index number
+      // If bottom row, default to same bottom row
+      //var NextItemIndex = CurTableIndexs[ CurIndexArrayKey + 1];
+      var NextItemIndex = (CurIndexArrayKey == pageLength-1) ? CurTableIndexs[ CurIndexArrayKey ] : CurTableIndexs[ CurIndexArrayKey + 1];
+
+      //alert( 'Row NextItemIndex: '+ NextItemIndex );
+      //Create Previous Row object
+      var PrevRow = url_table.row( PrevItemIndex );
+      //alert( 'Row PrevRow: '+ PrevRow.data() );
+      //Create Next Row object
+      var NextRow =  url_table.row( NextItemIndex );
+      //alert( 'Row NextRow: '+ NextRow.data() );
+
+      currRow =  $(this).closest('tr').prev('tr');
+      currRow.focus();
+      $('tr').removeClass('highlighted');
+      currRow.addClass('highlighted');
+      ////////////////
+      console.log('-->>logging');
+
+      // Select prev row
+      $(this).removeClass('selected');
+      PrevRow.select();
+      console.log('PrevRow-->>'+PrevRow.data());
+
+      if (url_table.row('.selected').data() !== undefined) {
+        var rowdata = url_table.row('.selected').data();
+      } else {
+        alert("You must select a row!");
+      }
+      // Get the rowdata
+      console.log("Rowdata-->> " + rowdata);
+      var this_id = rowdata[0];
+      var this_read_flag = "Read_flag"+this_id;
+      console.log(this_read_flag);
+      var flag_value = document.getElementById(this_read_flag).innerHTML;
+      console.log(flag_value);
+      document.getElementById(this_read_flag).innerHTML="1";
+      var myjsonObject = {id:this_id, read_flag:"1"};
+      console.log(myjsonObject);
+      // Post request like url?key1=value1&key2=value2
+      // use payload as the key and json string as a value
+      var datapayload = "payload=" + JSON.stringify(myjsonObject);
+      console.log(datapayload);
+
+      // Ajax Mysql request
+      jQuery.ajax({
+      type: "POST", // HTTP method POST or GET
+      url: "fetch_article.php", //Where to make Ajax calls
+      dataType:"text",
+      data: datapayload,
+      success:function(response){
+        clearArticles();
+        $("#article_table >tbody:first").append(response);
+        //alert(response);
+        //alert("Fetch success");
+        //console.log(response);
+        console.log('Fetch success');
+      },
+      error:function (xhr, ajaxOptions, thrownError){
+        //On error, we alert user
+        alert(thrownError);
+      }
+      });
+      //alert("UP");
+      
+    } else if (e.which == 40) {
+      // Down Arrow
+      // Get current prev and next rows
+      //alert( 'Row index: '+ url_table.row( this ).index() );
+
+      //Set the index based on the row that was clicked
+      var CurItemIndex = url_table.row( this ).index();
+      //Get the indexes 
+      var CurTableIndexs = url_table.rows().indexes();
+      var CountIndexes = CurTableIndexs.length;
+      //alert( 'Rows Count-->> '+CountIndexes);
+      // Get the array key for the current index we have
+      var CurIndexArrayKey = CurTableIndexs.indexOf( CurItemIndex );
+      //alert( 'Row CurIndexArrayKey: '+ CurIndexArrayKey );
+      // Subtract 1 to the array key to get the prior index number
+      // if top row, default to same top row
+      var PrevItemIndex = (CurIndexArrayKey > 0 ) ? CurTableIndexs[ CurIndexArrayKey - 1] : CurTableIndexs[0] ;
+      //alert( 'Row PrevItemIndex: '+ PrevItemIndex );
+      // Add 1 to get the next index number
+      // If bottom row, default to same bottom row
+      //var NextItemIndex = CurTableIndexs[ CurIndexArrayKey + 1];
+      var NextItemIndex = (CurIndexArrayKey == pageLength-1) ? CurTableIndexs[ CurIndexArrayKey ] : CurTableIndexs[ CurIndexArrayKey + 1];
+      //alert( 'Row NextItemIndex: '+ NextItemIndex );
+      //Create Previous Row object
+      var PrevRow = url_table.row( PrevItemIndex );
+      //alert( 'Row PrevRow: '+ PrevRow.data() );
+      //Create Next Row object
+      var NextRow =  url_table.row( NextItemIndex );
+      //alert( 'Row NextRow: '+ NextRow.data() );
+
+      currRow =  $(this).closest('tr').next('tr');
+      currRow.focus();
+      $('tr').removeClass('highlighted');
+      currRow.addClass('highlighted');
+      ////////////////
+      console.log('-->>logging');
+
+      // Select prev row
+      $(this).removeClass('selected');
+      NextRow.select();
+      console.log('NextRow-->>'+NextRow.data());
+
+      if (url_table.row('.selected').data() !== undefined) {
+        var rowdata = url_table.row('.selected').data();
+      } else {
+        alert("You must select a row!");
+      }
+      // Get the rowdata
+      console.log("Rowdata-->> " + rowdata);
+      var this_id = rowdata[0];
+      var this_read_flag = "Read_flag"+this_id;
+      console.log(this_read_flag);
+      var flag_value = document.getElementById(this_read_flag).innerHTML;
+      console.log(flag_value);
+      document.getElementById(this_read_flag).innerHTML="1";
+      var myjsonObject = {id:this_id, read_flag:"1"};
+      console.log(myjsonObject);
+      // Post request like url?key1=value1&key2=value2
+      // use payload as the key and json string as a value
+      var datapayload = "payload=" + JSON.stringify(myjsonObject);
+      console.log(datapayload);
+
+      // Ajax Mysql request
+      jQuery.ajax({
+      type: "POST", // HTTP method POST or GET
+      url: "fetch_article.php", //Where to make Ajax calls
+      dataType:"text",
+      data: datapayload,
+      success:function(response){
+        clearArticles();
+        $("#article_table >tbody:first").append(response);
+        //alert(response);
+        //alert("Fetch success");
+        //console.log(response);
+        console.log('Fetch success');
+      },
+      error:function (xhr, ajaxOptions, thrownError){
+        //On error, we alert user
+        alert(thrownError);
+      }
+      });
+      //alert("DOWN");
+      };
+
+  });
 
   $('#url_table tbody').on( 'click', 'tr', function () {
       if ( $(this).hasClass('selected') ) {
@@ -261,7 +441,8 @@ if (isset($_POST['datepicker']) && isset($_POST['relevancy']) && isset($_POST['c
   //echo "Error datepicker and relevancy not set!<br>";  
 };
 
-$sql = "SELECT idx, url, title, datasource, read_flag, DATE(dt_modified) as mydate FROM sentiment.article_urls where relevancy_score>=".$_SESSION['relevancy']." and read_flag=".$_SESSION['read']." and crypto_flag=".$_SESSION['crypto']." and scored_flag=".$_SESSION['scored']." and downloaded_flag = 1 and insert_date > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and insert_date < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
+$sql = "SELECT idx, url, title, datasource, read_flag, DATE(insert_date) as mydate FROM sentiment.article_urls where relevancy_score>=".$_SESSION['relevancy']." and read_flag=".$_SESSION['read']." and crypto_flag=".$_SESSION['crypto']." and scored_flag=".$_SESSION['scored']." and downloaded_flag = 1 and insert_date > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and insert_date < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
+
 echo "$sql<br>";
 $result = $conn->query($sql);
 
@@ -293,16 +474,13 @@ echo "</thead>";
 echo "<tbody>";
 
 $line_id=0;
+$idx=0;
 if ($result->num_rows > 0) {
     // output data of each row
     while($row = $result->fetch_assoc()) {
         $line_id=$row["idx"];
-        //$line_id++;
-        #echo "id: " . $row["id"]. " - Name: " . $row["content"]. " " . "<br>";
-        echo "<tr>";
+        echo "<tr tabindex='$idx'>";
         echo "<td class='ID' id='ID$line_id'>" . $row["idx"] . "</td>";
-        //echo "<td class='Url' id='Url$line_id'>" . $row["url"] . "<a href='" . $row["url"] . "'a> </td>";
-        //echo "<td class='Url' id='Url$line_id'> <a href='http://www.google.com/'>Cell 1</a></td>";
         $url_trunc = substr($row['url'], 0, 80);
         echo "<td class='Url' id='Url$line_id'> <a href='" . $row["url"] . "'>" . $url_trunc . "</a></td>";
         $title_trunc = substr($row['title'], 0, 60);
@@ -311,6 +489,7 @@ if ($result->num_rows > 0) {
         echo "<td class='Read_flag' id='Read_flag$line_id'>" . $row["read_flag"] . "</td>";
         echo "<td class='Date' id='Date$line_id'>" . $row["mydate"] . "</td>";
         echo "</tr>";
+        $idx++;
     }
 } else {
     echo "0 results";
