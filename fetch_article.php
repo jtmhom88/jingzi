@@ -35,7 +35,7 @@ if(isset($ary['id']) )
 
 	// Get the article
 	$article_table = "article_lines";
-	$this_sql2 = "SELECT article_idx, article_line_no, article_text from $databasename.$article_table where  article_idx=".$id." order by article_line_no asc";
+	$this_sql2 = "SELECT article_idx, article_line_no, article_text, nbayes_score from $databasename.$article_table where  article_idx=".$id." order by article_line_no asc";
 	//echo "$this_sql2 <br>";
 	$result = $conn->query($this_sql2);
 
@@ -45,6 +45,7 @@ if(isset($ary['id']) )
 	    while($row = $result->fetch_assoc()) {
 			$article_idx=$row["article_idx"];
 			$article_line_no=$row["article_line_no"];
+			$article_nbayes_score=substr($row["nbayes_score"],0,1);
 			$article_text=$row["article_text"];
 			//echo "<tr><td>$article_idx</td> <td>$article_line_no</td> <td>$article_text</td> </tr>";
 			echo "<tr>";
@@ -73,7 +74,8 @@ if(isset($ary['id']) )
             </TD>";
 			echo "<td class='IDX' id='IDX$article_line_no'>" . $article_idx . "</td>";
 			echo "<td class='Line_no' id='Line_no$article_line_no'>" . $article_line_no . "</td>";
-			$fixed_article_text = quote_colorize($article_text);
+			echo "<td class='Nbayes' id='Nbayes$article_nbayes_score'>" . $article_nbayes_score . "</td>";
+			$fixed_article_text = quote_colorize($article_text,$article_nbayes_score);
 			echo "<td class='Text' id='Text$article_line_no'>" . $fixed_article_text . "</td>";
 			echo "</tr>";
      	}
