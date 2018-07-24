@@ -424,24 +424,26 @@ $this_table='article_urls';
 
 // Get Session Parameters
 
-if (isset($_POST['datepicker']) && isset($_POST['relevancy']) && isset($_POST['crypto']) && isset($_POST['read']) && isset($_POST['scored']) ) {
+if (isset($_POST['datepicker']) && isset($_POST['relevancy']) && isset($_POST['crypto']) && isset($_POST['read']) && isset($_POST['scored']) && isset($_POST['nbayes']) ) {
   $_SESSION['datepicker'] = $_POST['datepicker'];
   $_SESSION['relevancy'] = $_POST['relevancy'];
   $_SESSION['crypto'] = $_POST['crypto'];
   $_SESSION['read'] = $_POST['read'];
   $_SESSION['scored'] = $_POST['scored'];
-} else if(!isset($_SESSION['datepicker']) || !isset($_SESSION['relevancy']) || !isset($_SESSION['crypto']) ||  !isset($_POST['read']) ||  !isset($_POST['scored']) ) {
+  $_SESSION['nbayes'] = $_POST['nbayes'];
+} else if(!isset($_SESSION['datepicker']) || !isset($_SESSION['relevancy']) || !isset($_SESSION['crypto']) ||  !isset($_POST['read']) ||  !isset($_POST['scored']) && isset($_POST['nbayes']) ) {
   echo "Set default datepicker and relevancy<br>";
   $_SESSION['datepicker'] = date('Y-m-d');
   $_SESSION['relevancy'] = 1;
   $_SESSION['crypto'] = 0;
   $_SESSION['read'] = 0;
   $_SESSION['scored'] = 0;
+  $_SESSION['nbayes'] = 0;
 } else {
   //echo "Error datepicker and relevancy not set!<br>";  
 };
 
-$sql = "SELECT idx, url, title, datasource, read_flag, DATE(insert_date) as mydate FROM sentiment.article_urls where relevancy_score>=".$_SESSION['relevancy']." and read_flag=".$_SESSION['read']." and crypto_flag=".$_SESSION['crypto']." and scored_flag=".$_SESSION['scored']." and downloaded_flag = 1 and insert_date > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and insert_date < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
+$sql = "SELECT idx, url, title, datasource, read_flag, DATE(insert_date) as mydate FROM sentiment.article_urls where relevancy_score>=".$_SESSION['relevancy']." and read_flag=".$_SESSION['read']." and crypto_flag=".$_SESSION['crypto']." and scored_flag=".$_SESSION['scored']." and nbayes_score=".$_SESSION['nbayes']." and downloaded_flag = 1 and insert_date > DATE_SUB(DATE('".$_SESSION['datepicker']."'), INTERVAL 12 HOUR) and insert_date < DATE_ADD(DATE('".$_SESSION['datepicker']."'), INTERVAL 24 HOUR) limit 2000";
 
 echo "$sql<br>";
 $result = $conn->query($sql);
@@ -509,6 +511,7 @@ $picked="state$line_id";
 <th>Sentiment</th>
 <th>Id</th>
 <th>Line</th>
+<th>NB</th>
 <th>Article Text</th>
 </tr>
 </thead>
