@@ -1,6 +1,6 @@
 .highlighted {
-  background-color: #F5A9E1;
-  color: #ffffff;
+  background-color: #b3b3b3;
+  color: #660066;
 }
 .container {
 	float: left; 
@@ -44,6 +44,13 @@ table#article_table {
     overflow: auto
 }
 
+.ff {
+  background-color: #f44;
+}
+#url_table tr:focus {
+	background: #f44;
+}
+
 div.controlbuttons {
 	line-height: 20px;
 	width: 50px;
@@ -54,4 +61,4 @@ div.controlbuttons {
 	position: fixed;
 	top:0;
 	right:20px;
- }
+}
