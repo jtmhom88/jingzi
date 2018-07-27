@@ -56,6 +56,7 @@ echo "Relevancy:<input type='text' name='relevancy' id='relevancy' value=1>
       Crypto:<input type='text' name='crypto' id='crypto' value=0>
       Read:<input type='text' name='read' id='read' value=0>
       Scored:<input type='text' name='scored' id='scored' value=0>
+      NB:<input type='text' name='nbayes' id='nbayes' value=0>
 			<br><br>
 			<input type='submit' name='submit' value='Run Reader'> 
 		</form>
